@@ -319,6 +319,23 @@ calificacion, estatus (ENUM)
 
 ---
 
+## 🌐 Deployment en Producción
+
+¿Quieres alojar este proyecto de manera gratuita? Consulta la guía completa en [DEPLOYMENT.md](DEPLOYMENT.md)
+
+### Opciones Recomendadas
+- **InfinityFree** - Hosting PHP + MySQL gratuito ⭐
+- **000WebHost** - Plan free con 300MB
+- **Railway** - $5 gratis mensuales con deploy automático
+
+La guía incluye:
+- Paso a paso detallado para InfinityFree
+- Configuración de FTP y base de datos
+- Solución de problemas comunes
+- Checklist de verificación
+
+---
+
 ## 👨‍💻 Desarrollo
 
 **Desarrollado por:** Stuart García  
