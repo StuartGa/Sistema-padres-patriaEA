@@ -1,0 +1,278 @@
+/**
+ * ESTILOS PERSONALIZADOS
+ * Instituto Padres de la Patria
+ * Complementa Bootstrap 5
+ */
+
+/* ===============================================
+   VARIABLES PERSONALIZADAS
+   =============================================== */
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #0dcaf0;
+    --dark-color: #212529;
+    --light-color: #f8f9fa;
+}
+
+/* ===============================================
+   ESTILOS GENERALES
+   =============================================== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* ===============================================
+   NAVBAR
+   =============================================== */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.navbar-brand i {
+    color: var(--warning-color);
+}
+
+.nav-link {
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+}
+
+/* ===============================================
+   CARDS
+   =============================================== */
+.card {
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,.15) !important;
+}
+
+.card-header {
+    border-bottom: 3px solid rgba(255,255,255,.2);
+    font-weight: 600;
+}
+
+/* ===============================================
+   TABLAS
+   =============================================== */
+.table {
+    background-color: white;
+}
+
+.table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, .05);
+    cursor: pointer;
+}
+
+/* ===============================================
+   BOTONES
+   =============================================== */
+.btn {
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,.2);
+}
+
+.btn-group .btn {
+    margin: 0 2px;
+}
+
+/* ===============================================
+   FORMULARIOS
+   =============================================== */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+/* ===============================================
+   ALERTS
+   =============================================== */
+.alert {
+    border-left: 4px solid;
+    border-radius: 0.375rem;
+}
+
+.alert-success {
+    border-left-color: var(--success-color);
+}
+
+.alert-danger {
+    border-left-color: var(--danger-color);
+}
+
+.alert-warning {
+    border-left-color: var(--warning-color);
+}
+
+.alert-info {
+    border-left-color: var(--info-color);
+}
+
+/* ===============================================
+   BADGES
+   =============================================== */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+}
+
+/* ===============================================
+   FOOTER
+   =============================================== */
+footer {
+    margin-top: auto;
+    background-color: var(--dark-color);
+}
+
+/* ===============================================
+   UTILIDADES
+   =============================================== */
+.shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+}
+
+.shadow {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+}
+
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+}
+
+/* Espaciado superior para compensar navbar fixed */
+body {
+    padding-top: 0;
+}
+
+/* ===============================================
+   ANIMACIONES
+   =============================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+/* ===============================================
+   RESPONSIVE
+   =============================================== */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    h1, .h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2, .h2 {
+        font-size: 1.5rem;
+    }
+    
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+/* ===============================================
+   TOOLTIPS
+   =============================================== */
+.tooltip {
+    font-size: 0.875rem;
+}
+
+.tooltip-inner {
+    max-width: 250px;
+    padding: 0.5rem 0.75rem;
+}
+
+/* ===============================================
+   MODALES
+   =============================================== */
+.modal-header {
+    border-bottom: 2px solid rgba(0,0,0,.1);
+}
+
+.modal-footer {
+    border-top: 2px solid rgba(0,0,0,.1);
+}
+
+/* ===============================================
+   LOADING SPINNER (opcional)
+   =============================================== */
+.spinner-custom {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,62 @@
+# Archivos de configuración local
+includes/conexion.php.local
+config.local.php
+
+# Archivos de sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDEs y editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+error_log
+php_error.log
+
+# Archivos temporales
+tmp/
+temp/
+cache/
+*.tmp
+*.bak
+
+# Uploads (si agregas funcionalidad de subida de archivos)
+uploads/*
+!uploads/.gitkeep
+
+# Node modules (si usas npm)
+node_modules/
+package-lock.json
+
+# Composer (si usas composer)
+vendor/
+composer.lock
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos de respaldo de BD
+*.sql.backup
+backup/
+
+# Archivos de documentación temporal
+docs/temp/
+
+# Sistema de pruebas
+tests/coverage/
+phpunit.xml
