@@ -13,10 +13,27 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['tipo_usuario'] !== 'CE') {
 
 require_once 'includes/conexion.php';
 
-// Obtener todas las inscripciones usando la vista
+// Obtener todas las inscripciones usando JOIN directo (compatible con hosting sin VIEW)
 $stmt = $pdo->query("
-    SELECT * FROM vista_inscripciones
-    ORDER BY asignatura, apellido, nombre
+    SELECT 
+        au.id,
+        u.id as usuario_id,
+        u.nombre,
+        u.apellido,
+        u.correo,
+        u.usuario,
+        a.id as asignatura_id,
+        a.nombre as asignatura,
+        a.grupo,
+        a.profesor,
+        au.fecha_inscripcion,
+        au.calificacion,
+        au.estatus
+    FROM asignaturas_usuarios au
+    INNER JOIN usuarios u ON au.id_usuario = u.id
+    INNER JOIN asignaturas a ON au.id_asignatura = a.id
+    WHERE u.activo = 1 AND a.activa = 1
+    ORDER BY a.nombre, u.apellido, u.nombre
 ");
 $inscripciones = $stmt->fetchAll();
 

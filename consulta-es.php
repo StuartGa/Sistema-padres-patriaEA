@@ -13,19 +13,23 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['tipo_usuario'] !== 'ES') {
 
 require_once 'includes/conexion.php';
 
-// Obtener asignaturas del estudiante usando la vista
+// Obtener asignaturas del estudiante usando JOIN directo (compatible con hosting sin VIEW)
 $stmt = $pdo->prepare("
     SELECT 
-        asignatura_id,
-        asignatura,
-        grupo,
-        profesor,
-        fecha_inscripcion,
-        calificacion,
-        estatus
-    FROM vista_inscripciones
-    WHERE usuario_id = ?
-    ORDER BY asignatura
+        a.id AS asignatura_id,
+        a.nombre AS asignatura,
+        a.grupo,
+        a.profesor,
+        au.fecha_inscripcion,
+        au.calificacion,
+        au.estatus
+    FROM asignaturas_usuarios au
+    INNER JOIN usuarios u ON au.id_usuario = u.id
+    INNER JOIN asignaturas a ON au.id_asignatura = a.id
+    WHERE au.id_usuario = ?
+      AND u.activo = 1
+      AND a.activa = 1
+    ORDER BY a.nombre
 ");
 $stmt->execute([$_SESSION['usuario_id']]);
 $asignaturas = $stmt->fetchAll();

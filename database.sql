@@ -3,13 +3,10 @@
 -- Base de datos: padres_patria
 -- ============================================================
 
--- Crear la base de datos
-CREATE DATABASE IF NOT EXISTS padres_patria 
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;
-
--- Usar la base de datos
-USE padres_patria;
+-- IMPORTANTE PARA HOSTING COMPARTIDO (InfinityFree/000webhost):
+-- 1) Crea la base de datos desde el panel del hosting.
+-- 2) Selecciónala en phpMyAdmin antes de importar este archivo.
+-- 3) No incluyas CREATE DATABASE ni USE, porque suelen estar bloqueados.
 
 -- ============================================================
 -- TABLA: usuarios
@@ -110,29 +107,10 @@ INSERT INTO asignaturas_usuarios (id_usuario, id_asignatura, estatus) VALUES
 (2, 4, 'cursando');
 
 -- ============================================================
--- VISTAS ÚTILES
+-- NOTA IMPORTANTE
 -- ============================================================
-
--- Vista para consultar inscripciones con detalles
-CREATE OR REPLACE VIEW vista_inscripciones AS
-SELECT 
-    au.id,
-    u.id as usuario_id,
-    u.nombre,
-    u.apellido,
-    u.correo,
-    u.usuario,
-    a.id as asignatura_id,
-    a.nombre as asignatura,
-    a.grupo,
-    a.profesor,
-    au.fecha_inscripcion,
-    au.calificacion,
-    au.estatus
-FROM asignaturas_usuarios au
-INNER JOIN usuarios u ON au.id_usuario = u.id
-INNER JOIN asignaturas a ON au.id_asignatura = a.id
-WHERE u.activo = 1 AND a.activa = 1;
+-- En InfinityFree/000webhost normalmente no hay permisos para CREATE VIEW.
+-- Las consultas del proyecto ya están preparadas para funcionar sin vistas.
 
 -- ============================================================
 -- FIN DEL SCRIPT
