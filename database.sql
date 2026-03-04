@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS asignaturas_usuarios (
 
 -- Insertar usuario coordinador (CE)
 -- Usuario: admin / Contraseña: Admin123*
-INSERT INTO usuarios (nombre, apellido, correo, usuario, password, tipo) 
+INSERT INTO usuarios (nombre, apellido, correo, usuario, password, tipo)
 VALUES (
     'Juan', 
     'Pérez García',
@@ -77,7 +77,12 @@ VALUES (
     'admin',
     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- Admin123*
     'CE'
-);
+) ON DUPLICATE KEY UPDATE
+    nombre = VALUES(nombre),
+    apellido = VALUES(apellido),
+    password = VALUES(password),
+    tipo = VALUES(tipo),
+    activo = 1;
 
 -- Insertar usuario estudiante de prueba (ES)
 -- Usuario: estudiante1 / Contraseña: Alumno123*
@@ -89,22 +94,83 @@ VALUES (
     'estudiante1',
     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', -- Alumno123*
     'ES'
-);
+) ON DUPLICATE KEY UPDATE
+    nombre = VALUES(nombre),
+    apellido = VALUES(apellido),
+    password = VALUES(password),
+    tipo = VALUES(tipo),
+    activo = 1;
 
 -- Insertar asignaturas de ejemplo
-INSERT INTO asignaturas (nombre, grupo, profesor, cupo_maximo, descripcion) VALUES
-('Matemáticas Avanzadas', '3A', 'Dr. Carlos Ramírez', 30, 'Curso avanzado de cálculo diferencial e integral'),
-('Programación Web 2', '3B', 'Ing. Ana Martínez', 25, 'Desarrollo web con PHP, MySQL y frameworks modernos'),
-('Física II', '3A', 'Dra. Laura Sánchez', 30, 'Mecánica clásica y termodinámica'),
-('Literatura Universal', '3C', 'Lic. Roberto Torres', 35, 'Análisis de obras literarias clásicas y contemporáneas'),
-('Química Orgánica', '3B', 'Dr. Miguel Ángel Ruiz', 28, 'Estudio de compuestos orgánicos y reacciones'),
-('Historia de México', '3A', 'Mtro. Fernando Díaz', 32, 'Historia desde la época prehispánica hasta la actualidad');
+INSERT INTO asignaturas (nombre, grupo, profesor, cupo_maximo, descripcion)
+SELECT 'Matemáticas Avanzadas', '3A', 'Dr. Carlos Ramírez', 30, 'Curso avanzado de cálculo diferencial e integral'
+WHERE NOT EXISTS (
+    SELECT 1 FROM asignaturas WHERE nombre = 'Matemáticas Avanzadas' AND grupo = '3A'
+);
+
+INSERT INTO asignaturas (nombre, grupo, profesor, cupo_maximo, descripcion)
+SELECT 'Programación Web 2', '3B', 'Ing. Ana Martínez', 25, 'Desarrollo web con PHP, MySQL y frameworks modernos'
+WHERE NOT EXISTS (
+    SELECT 1 FROM asignaturas WHERE nombre = 'Programación Web 2' AND grupo = '3B'
+);
+
+INSERT INTO asignaturas (nombre, grupo, profesor, cupo_maximo, descripcion)
+SELECT 'Física II', '3A', 'Dra. Laura Sánchez', 30, 'Mecánica clásica y termodinámica'
+WHERE NOT EXISTS (
+    SELECT 1 FROM asignaturas WHERE nombre = 'Física II' AND grupo = '3A'
+);
+
+INSERT INTO asignaturas (nombre, grupo, profesor, cupo_maximo, descripcion)
+SELECT 'Literatura Universal', '3C', 'Lic. Roberto Torres', 35, 'Análisis de obras literarias clásicas y contemporáneas'
+WHERE NOT EXISTS (
+    SELECT 1 FROM asignaturas WHERE nombre = 'Literatura Universal' AND grupo = '3C'
+);
+
+INSERT INTO asignaturas (nombre, grupo, profesor, cupo_maximo, descripcion)
+SELECT 'Química Orgánica', '3B', 'Dr. Miguel Ángel Ruiz', 28, 'Estudio de compuestos orgánicos y reacciones'
+WHERE NOT EXISTS (
+    SELECT 1 FROM asignaturas WHERE nombre = 'Química Orgánica' AND grupo = '3B'
+);
+
+INSERT INTO asignaturas (nombre, grupo, profesor, cupo_maximo, descripcion)
+SELECT 'Historia de México', '3A', 'Mtro. Fernando Díaz', 32, 'Historia desde la época prehispánica hasta la actualidad'
+WHERE NOT EXISTS (
+    SELECT 1 FROM asignaturas WHERE nombre = 'Historia de México' AND grupo = '3A'
+);
 
 -- Inscribir al estudiante de prueba en algunas asignaturas
-INSERT INTO asignaturas_usuarios (id_usuario, id_asignatura, estatus) VALUES
-(2, 1, 'cursando'),
-(2, 2, 'cursando'),
-(2, 4, 'cursando');
+INSERT INTO asignaturas_usuarios (id_usuario, id_asignatura, estatus)
+SELECT u.id, a.id, 'cursando'
+FROM usuarios u
+INNER JOIN asignaturas a ON a.nombre = 'Matemáticas Avanzadas' AND a.grupo = '3A'
+WHERE u.usuario = 'estudiante1'
+    AND NOT EXISTS (
+            SELECT 1
+            FROM asignaturas_usuarios au
+            WHERE au.id_usuario = u.id AND au.id_asignatura = a.id
+    );
+
+INSERT INTO asignaturas_usuarios (id_usuario, id_asignatura, estatus)
+SELECT u.id, a.id, 'cursando'
+FROM usuarios u
+INNER JOIN asignaturas a ON a.nombre = 'Programación Web 2' AND a.grupo = '3B'
+WHERE u.usuario = 'estudiante1'
+    AND NOT EXISTS (
+            SELECT 1
+            FROM asignaturas_usuarios au
+            WHERE au.id_usuario = u.id AND au.id_asignatura = a.id
+    );
+
+INSERT INTO asignaturas_usuarios (id_usuario, id_asignatura, estatus)
+SELECT u.id, a.id, 'cursando'
+FROM usuarios u
+INNER JOIN asignaturas a ON a.nombre = 'Literatura Universal' AND a.grupo = '3C'
+WHERE u.usuario = 'estudiante1'
+    AND NOT EXISTS (
+            SELECT 1
+            FROM asignaturas_usuarios au
+            WHERE au.id_usuario = u.id AND au.id_asignatura = a.id
+    );
 
 -- ============================================================
 -- NOTA IMPORTANTE
