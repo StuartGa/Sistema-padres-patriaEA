@@ -7,6 +7,7 @@
  */
 session_start();
 require_once 'includes/conexion.php';
+require_once 'includes/recaptcha_config.php';
 
 // Variables para mensajes y valores del formulario
 $mensaje = '';
@@ -15,86 +16,134 @@ $nombre = $apellido = $correo = $usuario = '';
 
 // Procesar formulario cuando se envía
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recibir y limpiar datos
-    $nombre = limpiar_entrada($_POST['nombre'] ?? '');
-    $apellido = limpiar_entrada($_POST['apellido'] ?? '');
-    $correo = limpiar_entrada($_POST['correo'] ?? '');
-    $usuario = limpiar_entrada($_POST['usuario'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $password_confirm = $_POST['password_confirm'] ?? '';
     
-    // Array de errores
-    $errores = [];
-    
-    // Validaciones
-    if (empty($nombre)) {
-        $errores[] = 'El nombre es obligatorio';
-    }
-    
-    if (empty($apellido)) {
-        $errores[] = 'El apellido es obligatorio';
-    }
-    
-    if (empty($correo) || !validar_email($correo)) {
-        $errores[] = 'El correo electrónico no es válido';
-    }
-    
-    if (empty($usuario) || strlen($usuario) < 4) {
-        $errores[] = 'El usuario debe tener al menos 4 caracteres';
-    }
-    
-    if (empty($password) || !validar_password($password)) {
-        $errores[] = 'La contraseña debe tener mínimo 8 caracteres, incluir letras, números y al menos un caracter especial (#,*,?, etc.)';
-    }
-    
-    if ($password !== $password_confirm) {
-        $errores[] = 'Las contraseñas no coinciden';
-    }
-    
-    // Si no hay errores, proceder al registro
-    if (empty($errores)) {
-        try {
-            // Verificar si el usuario o correo ya existen
-            $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE usuario = ? OR correo = ?");
-            $stmt->execute([$usuario, $correo]);
-            
-            if ($stmt->rowCount() > 0) {
-                $errores[] = 'El usuario o correo electrónico ya están registrados';
-            } else {
-                // Encriptar contraseña
-                $password_hash = password_hash($password, PASSWORD_DEFAULT);
-                
-                // Insertar nuevo usuario
-                $stmt = $pdo->prepare("
-                    INSERT INTO usuarios (nombre, apellido, correo, usuario, password, tipo) 
-                    VALUES (?, ?, ?, ?, ?, 'ES')
-                ");
-                
-                if ($stmt->execute([$nombre, $apellido, $correo, $usuario, $password_hash])) {
-                    $tipo_mensaje = 'success';
-                    $mensaje = '¡Registro exitoso! Ahora puedes iniciar sesión.';
-                    // Limpiar variables
-                    $nombre = $apellido = $correo = $usuario = '';
-                    
-                    // Redirigir después de 2 segundos
-                    header("refresh:2;url=login.php");
-                } else {
-                    $errores[] = 'Error al registrar el usuario';
-                }
-            }
-        } catch (PDOException $e) {
-            $errores[] = 'Error en la base de datos: ' . $e->getMessage();
-        }
-    }
-    
-    // Si hay errores, mostrarlos
-    if (!empty($errores)) {
+    // ============================================================
+    // VERIFICACIÓN DE reCAPTCHA v3
+    // ============================================================
+    if (!isset($_POST['recaptcha_token']) || empty($_POST['recaptcha_token'])) {
         $tipo_mensaje = 'danger';
-        $mensaje = '<ul class="mb-0">';
-        foreach ($errores as $error) {
-            $mensaje .= '<li>' . htmlspecialchars($error) . '</li>';
+        $mensaje = 'Error: No se recibió el token de seguridad. Intenta nuevamente.';
+    } else {
+        $recaptcha_token = $_POST['recaptcha_token'];
+        $recaptcha_secret = RECAPTCHA_SECRET_KEY;
+        
+        // Verificar token con Google
+        $verify_url = "https://www.google.com/recaptcha/api/siteverify";
+        $verify_data = http_build_query([
+            'secret' => $recaptcha_secret,
+            'response' => $recaptcha_token
+        ]);
+        
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => 'Content-type: application/x-www-form-urlencoded',
+                'content' => $verify_data
+            ]
+        ]);
+        
+        $verify_response = file_get_contents($verify_url, false, $context);
+        $responseData = json_decode($verify_response, true);
+        
+        // Validar respuesta reCAPTCHA
+        $recaptcha_valid = false;
+        if ($responseData["success"] === true && 
+            $responseData["score"] >= RECAPTCHA_SCORE_THRESHOLD && 
+            $responseData["action"] === RECAPTCHA_ACTION) {
+            $recaptcha_valid = true;
         }
-        $mensaje .= '</ul>';
+        
+        if (!$recaptcha_valid) {
+            $tipo_mensaje = 'danger';
+            $mensaje = 'No se pudo validar la solicitud de seguridad. Intenta nuevamente.';
+        }
+    }
+    
+    // ============================================================
+    // Si reCAPTCHA es válido, proceder con validaciones de registro
+    // ============================================================
+    if (isset($recaptcha_valid) && $recaptcha_valid) {
+        // Recibir y limpiar datos
+        $nombre = limpiar_entrada($_POST['nombre'] ?? '');
+        $apellido = limpiar_entrada($_POST['apellido'] ?? '');
+        $correo = limpiar_entrada($_POST['correo'] ?? '');
+        $usuario = limpiar_entrada($_POST['usuario'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $password_confirm = $_POST['password_confirm'] ?? '';
+        
+        // Array de errores
+        $errores = [];
+        
+        // Validaciones
+        if (empty($nombre)) {
+            $errores[] = 'El nombre es obligatorio';
+        }
+    
+        if (empty($apellido)) {
+            $errores[] = 'El apellido es obligatorio';
+        }
+        
+        if (empty($correo) || !validar_email($correo)) {
+            $errores[] = 'El correo electrónico no es válido';
+        }
+        
+        if (empty($usuario) || strlen($usuario) < 4) {
+            $errores[] = 'El usuario debe tener al menos 4 caracteres';
+        }
+        
+        if (empty($password) || !validar_password($password)) {
+            $errores[] = 'La contraseña debe tener mínimo 8 caracteres, incluir letras, números y al menos un caracter especial (#,*,?, etc.)';
+        }
+        
+        if ($password !== $password_confirm) {
+            $errores[] = 'Las contraseñas no coinciden';
+        }
+        
+        // Si no hay errores, proceder al registro
+        if (empty($errores)) {
+            try {
+                // Verificar si el usuario o correo ya existen
+                $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE usuario = ? OR correo = ?");
+                $stmt->execute([$usuario, $correo]);
+                
+                if ($stmt->rowCount() > 0) {
+                    $errores[] = 'El usuario o correo electrónico ya están registrados';
+                } else {
+                    // Encriptar contraseña
+                    $password_hash = password_hash($password, PASSWORD_DEFAULT);
+                    
+                    // Insertar nuevo usuario
+                    $stmt = $pdo->prepare("
+                        INSERT INTO usuarios (nombre, apellido, correo, usuario, password, tipo) 
+                        VALUES (?, ?, ?, ?, ?, 'ES')
+                    ");
+                    
+                    if ($stmt->execute([$nombre, $apellido, $correo, $usuario, $password_hash])) {
+                        $tipo_mensaje = 'success';
+                        $mensaje = '¡Registro exitoso! El usuario se ha almacenado correctamente. Ahora puedes iniciar sesión.';
+                        // Limpiar variables
+                        $nombre = $apellido = $correo = $usuario = '';
+                        
+                        // Redirigir después de 2 segundos
+                        header("refresh:2;url=login.php");
+                    } else {
+                        $errores[] = 'Error al registrar el usuario';
+                    }
+                }
+            } catch (PDOException $e) {
+                $errores[] = 'Error en la base de datos: ' . $e->getMessage();
+            }
+        }
+        
+        // Si hay errores, mostrarlos
+        if (!empty($errores)) {
+            $tipo_mensaje = 'danger';
+            $mensaje = '<ul class="mb-0">';
+            foreach ($errores as $error) {
+                $mensaje .= '<li>' . htmlspecialchars($error) . '</li>';
+            }
+            $mensaje .= '</ul>';
+        }
     }
 }
 ?>
@@ -113,6 +162,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="css/estilos.css">
+    
+    <!-- ============================================================ -->
+    <!-- reCAPTCHA v3 - Script de Google -->
+    <!-- ============================================================ -->
+    <script src="https://www.google.com/recaptcha/api.js?render=<?php echo RECAPTCHA_SITE_KEY; ?>"></script>
 </head>
 <body>
     
@@ -246,6 +300,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             </div>
 
+                            <!-- ============================================================ -->
+                            <!-- Campo oculto para token de reCAPTCHA v3 -->
+                            <!-- ============================================================ -->
+                            <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+
                             <!-- Botones -->
                             <div class="mt-4 d-flex justify-content-between">
                                 <a href="index.php" class="btn btn-secondary">
@@ -284,6 +343,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     <!-- Script personalizado -->
     <script src="js/main.js"></script>
+    
+    <!-- ============================================================ -->
+    <!-- reCAPTCHA v3 - Ejecutar validación de registro -->
+    <!-- ============================================================ -->
+    <script>
+        // Ejecutar reCAPTCHA v3 cuando la página carga
+        grecaptcha.ready(function() {
+            grecaptcha.execute('<?php echo RECAPTCHA_SITE_KEY; ?>', {action: '<?php echo RECAPTCHA_ACTION; ?>'}).then(function(token) {
+                // Colocar el token en el campo oculto
+                document.getElementById('recaptcha_token').value = token;
+            });
+        });
+    </script>
     
     <!-- Inicializar tooltips -->
     <script>

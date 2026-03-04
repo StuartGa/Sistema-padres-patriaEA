@@ -1,6 +1,7 @@
 # Archivos de configuración local
 includes/conexion.php
 includes/conexion.php.local
+includes/recaptcha_config.php
 config.local.php
 
 # Archivos de sistema operativo
