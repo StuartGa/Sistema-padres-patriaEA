@@ -1,4 +1,5 @@
 # Archivos de configuración local
+includes/conexion.php
 includes/conexion.php.local
 config.local.php
 
